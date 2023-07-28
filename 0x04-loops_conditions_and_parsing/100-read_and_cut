@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Bash script that displays the content of the file /etc/passwd.
+# Your script should only display:
+#	username
+#	user id
+#	Home directory path for the user
+
+passwd_file="/etc/passwd"
+
+# Check if the passwd file exists and is readable
+if [ ! -r "$passwd_file" ]; then
+	echo "Error: /etc/passwd file is not readable or does not exist."
+	exit 1
+fi
+
+# Read the passwd file line by line using a while loop
+while IFS=":" read -r username x user_id x x home_directory x;
+do
+	echo "Username: $username"
+	echo "User ID: $user_id"
+	echo "Home Directory: $home_directory"
+done< "$passwd_file"
