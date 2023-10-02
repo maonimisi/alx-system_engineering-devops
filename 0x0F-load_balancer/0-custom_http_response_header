@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Automating the nginx configuration
+sudo apt-get -y update
+sudo apt-get -y upgrade
+sudo apt-get -y install nginx
+echo "add_header X-Served-By $(hostname);" | sudo tee -a /etc/nginx/nginx.conf > /dev/null
+sudo systemctl reload nginx
