@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 # Automating the nginx configuration
+
 sudo apt-get -y update
 sudo apt-get -y upgrade
 sudo apt-get -y install nginx
-echo "add_header X-Served-By $(hostname);" | sudo tee -a /etc/nginx/nginx.conf > /dev/null
-sudo systemctl reload nginx
+sudo service nginx start
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html
+newlines="\\\terror_page 404 /404.html;\n\tlocation = /404.html {\n\t\troot /var/www/html;\n\t\tinternal;\n\t}"
+sudo sed -i "55i $newlines" /etc/nginx/sites-available/default
+sudo sed -i "52i\add_header X-Served-By $HOSTNAME always;" /etc/nginx/sites-available/default
+sudo service nginx restart
+sudo service nginx reload
