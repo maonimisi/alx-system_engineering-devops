@@ -1,17 +1,26 @@
 #!/usr/bin/env bash
-# Bash script that will display information about subdomains
 
 display_info ()
 {
     domain="$1"
     subdomain="$2"
-    dig "$subdomain.$domain" | awk '/ANSWER SECTION:/{getline; printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$subdomain"
+    record_type=$(dig +short -t "$subdomain" "$domain")
+    echo "The subdomain $subdomain is a $record_type record and points to $domain"
 }
 
-for subdomain in "www" "lb-01" "web-01" "web-02"
-do
-    if [ -z "$2" ] || [ "$2" == "$subdomain" ] ;
-    then
-	display_info "$1" "$subdomain"
-    fi
-done
+if [ "$#" -lt 1 ]; then
+    echo "Error: Missing domain parameter"
+    exit 1
+fi
+
+if [ "$#" -eq 1 ]; then
+    for subdomain in "www" "lb-01" "web-01" "web-02"
+    do
+        display_info "$1" "$subdomain"
+    done
+elif [ "$#" -eq 2 ]; then
+    display_info "$1" "$2"
+else
+    echo "Error: Too many arguments"
+    exit 1
+fi
