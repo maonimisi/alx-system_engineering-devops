@@ -25,8 +25,8 @@ frontend www-https
 backend www-backend
     balance roundrobin
     mode http
-    server web-01 [STUDENT_ID]-web-01:80 check
-    server web-02 [STUDENT_ID]-web-02:80 check
+    server web-01 54.157.172.41:80 check
+    server web-02 54.174.165.251:80 check
 
 backend letsencrypt-backend
     server letsencrypt 127.0.0.1:54321
