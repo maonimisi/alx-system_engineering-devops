@@ -1,30 +1,43 @@
 #!/usr/bin/env bash
 # Script that configures a new Ubuntu machine with HAProxy load balancer
 
-# Update package index and install necessary packages
-apt-get -y update
-apt-get install -y --no-install-recommends software-properties-common
+#!/usr/bin/env bash
+#Installs and configures HAproxy in a load balancer server
 
-# Add HAProxy repository and install HAProxy
-add-apt-repository -y ppa:vbernat/haproxy-2.8
-apt-get -y update
-apt-get install -y haproxy=2.8.\*
+apt-get install -y software-properties-common
+add-apt-repository -y ppa:vbernat/haproxy-1.8
+apt-get update
+apt-get install -y haproxy=1.8.\*
 
-# Configure HAProxy
-cat > /etc/haproxy/haproxy.cfg << EOF
-frontend Local_Server
-        bind *:80
-        mode http
-        default_backend Web_Servers
-backend Web_Servers
-        balance roundrobin
-        mode http
-        server 265123-web-01 54.157.172.41:80 check
-        server 265123-web-02 54.174.165.251:80 check
-EOF
+echo "ENABLED=1" >> /etc/default/haproxy
+mv /etc/haproxy/haproxy.cfg{,.original}
+touch /etc/haproxy/haproxy.cfg
 
-# Enable HAProxy init script
-sed -i 's/ENABLED=0/ENABLED=1/' /etc/default/haproxy
+printf %s "global
+    log 127.0.0.1 local0 notice
+    maxconn 2000
+    user haproxy
+    group haproxy
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    retries 3
+    option redispatch
+    timeout connect  5000
+    timeout client  10000
+    timeout server  10000
+listen hbnb
+    bind 0.0.0.0:80
+    mode http
+    stats enable
+    stats uri /haproxy?stats
+    balance roundrobin
+    option httpclose
+    option forwardfor
+    server 59637-web-01 54.160.85.72:80 check
+    server 59637-web-02 35.175.132.106:80 check
+" >> /etc/haproxy/haproxy.cfg
 
-# Restart HAProxy service
-service haproxy restart
+service haproxy start
