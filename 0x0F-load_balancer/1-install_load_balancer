@@ -2,37 +2,40 @@
 # Script that configures HAProxy load balancer on a new Ubuntu machine
 
 # Install HAProxy
-apt-get -y install --no-install-recommends software-properties-common
-add-apt-repository -y ppa:vbernat/haproxy-2.0
-apt-get -y update
-apt-get -y install haproxy=2.0.*
+apt-get install -y software-properties-common
+add-apt-repository -y ppa:vbernat/haproxy-1.8
+apt-get update
+apt-get install -y haproxy=1.8.\*
 
-# Configure HAProxy
-cat > /etc/haproxy/haproxy.cfg << EOF
-frontend www-http
-    bind 54.157.172.41:80
+echo "ENABLED=1" >> /etc/default/haproxy
+mv /etc/haproxy/haproxy.cfg{,.original}
+touch /etc/haproxy/haproxy.cfg
+
+printf %s "global
+    log 127.0.0.1 local0 notice
+    maxconn 2000
+    user haproxy
+    group haproxy
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    retries 3
+    option redispatch
+    timeout connect  5000
+    timeout client  10000
+    timeout server  10000
+listen hbnb
+    bind 0.0.0.0:80
     mode http
-    reqadd X-Forwarded-Proto:\ http
-    default_backend www-backend
-
-frontend www-https
-    bind 54.157.172.41:443 ssl crt /etc/ssl/certs/www.maonimisi.tech.pem
-    reqadd X-Forwarded-Proto:\ https
-    acl letsencrypt-acl path_beg /.well-known/acme-challenge/
-    use_backend letsencrypt-backend if letsencrypt-acl
-    default_backend www-backend
-
-backend www-backend
+    stats enable
+    stats uri /haproxy?stats
     balance roundrobin
-    mode http
-    server web-01 54.157.172.41:80 check
-    server web-02 54.174.165.251:80 check
+    option httpclose
+    option forwardfor
+    server 265123-web-01 54.157.172.41:80 check
+    server 265123-web-02 54.174.165.251:80 check
+" >> /etc/haproxy/haproxy.cfg
 
-backend letsencrypt-backend
-    server letsencrypt 127.0.0.1:54321
-
-EOF
-
-# Restart HAProxy and enable on boot
-service haproxy restart
-systemctl enable haproxy
+service haproxy start
