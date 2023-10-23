@@ -15,11 +15,24 @@ if __name__ == '__main__':
     todo = requests.get("https://jsonplaceholder.typicode.com/todos?userId={}".
                         format(user_id), verify=False).json()
 
+    completed_tasks = []
+    for task in todo:
+        if task.get('completed') is True:
+            completed_tasks.append(task.get('title'))
+    print("Employee {} is done with tasks({}/{}):"
+          .format(user.get('name'), len(completed_tasks), len(todo)))
+
+    for task in completed_tasks:
+        print("\t {}".format(task))
+
+"""
     task_completed = []
     for task in todo:
         if task.get('completed') is True:
             task_completed.append(task.get('title'))
     print("Employee {} is done with tasks({}/{}):"
           .format(user.get('name'), len(task_completed), len(todo)))
+
     for task in task_completed:
         print("\t {}".format(task))
+"""
