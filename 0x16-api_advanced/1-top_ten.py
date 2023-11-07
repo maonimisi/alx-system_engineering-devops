@@ -8,20 +8,16 @@ def top_ten(subreddit):
        of the first 10 hot posts listed for a given subreddit
     '''
 
-    url = 'https://www.reddit.com/r/{}/about.json'.format(subreddit)
-    user_agent = {'User-Agent': 'maonimisi'}
+    req = requests.get(
+        "https://www.reddit.com/r/{}/hot.json".format(subreddit),
+        headers={"User-Agent": "Custom"},
+        params={"limit": 10},
+    )
 
-    if subreddit is None or type(subreddit) != str:
-        print(None)
-    req = requests.get(url, headers=user_agent, allow_redirects=False,
-                       params={'limit': 10}).json()
-    data = req.get('data')
-    if data:
-        children = data.get('children')
-    if data is not None and children is not None:
-        for post in children:
-            postData = post.get('data')
-            title = postData.get('title')
+    if req.status_code == 200:
+        for get_data in req.json().get("data").get("children"):
+            dat = get_data.get("data")
+            title = dat.get("title")
             print(title)
     else:
-        print('None')
+        print(None)
