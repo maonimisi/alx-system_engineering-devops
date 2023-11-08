@@ -16,7 +16,7 @@ def number_of_subscribers(subreddit):
     user_agent = {'User-Agent': 'Python/requests'}
 
     response = requests.get(api_uri, headers=user_agent,
-                       allow_redirects=False)
+                            allow_redirects=False)
 
     if response.status_code in [302, 404]:
         return 0
